@@ -10,6 +10,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import Header from "@/components/header";
 import { mbjs } from "@mintbase-js/sdk";
 import { SocialMedias } from "@/components/Social";
+import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -46,7 +47,13 @@ export default function RootLayout({
     callbackUrl: getCallbackUrl(),
   };
 
+  const mintbaseClient = new ApolloClient({
+    uri: "https://interop-mainnet.hasura.app/v1/graphql",
+    cache: new InMemoryCache(),
+  });
+
   return (
+    <ApolloProvider client={mintbaseClient}>
     <QueryClientProvider client={queryClient}>
       <MintbaseWalletContextProvider {...MintbaseWalletSetup}>
         <html lang="en">
@@ -58,5 +65,6 @@ export default function RootLayout({
         </html>
       </MintbaseWalletContextProvider>
     </QueryClientProvider>
+    </ApolloProvider>
   );
 }

@@ -24,9 +24,9 @@ const LandingPage = () => {
   return (
     // <div className="w-full flex flex-col items-start gap-4">
     <div className="flex grid w-full content-center justify-center bg-[#111111]">
-      <div className="flex w-full">
+      {/* <div className="flex w-full">
         <Items showModal={handleOpenBuyModal} />
-      </div>
+      </div> */}
       <Marketplace />
       <div className="mx-24 mt-4">
         {!!showBuyModal && (
