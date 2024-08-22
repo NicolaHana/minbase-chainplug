@@ -52,7 +52,7 @@ function LoadingItem(): JSX.Element {
     <>
       {products.map((productKey) => (
         <div key={productKey} className="flex items-center justify-center ">
-          <div className="w-full h-72 bg-slate-900 animate-pulse rounded-xl shadow-xl" />
+          <div className="w-[501px] h-[501px] bg-slate-900 animate-pulse rounded-xl shadow-xl" />
         </div>
       ))}
     </>
