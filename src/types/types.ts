@@ -1,3 +1,5 @@
+import { Contract, WalletConnection } from "near-api-js"
+
 export enum TransactionEnum {
   MINT = 'mint',
   TRANSFER = 'transfer',
@@ -68,4 +70,24 @@ export interface PriceEl {
 
 export interface BuyModalData {
   data: TokenListData
+}
+
+
+export interface WalletConnect {
+  contract: any;
+  walletConnection: WalletConnection;
+  rentalContractId: any;
+  rentalContract: Contract;
+}
+
+export interface FeaturedData {
+  base_uri: string,
+  media: string,
+  description: string,
+  nft_contract_id: string,
+  nft_contract_icon: string,
+  nft_contract_name: string,
+  owner: string,
+  title: string,
+  token_id: string
 }

@@ -3,11 +3,13 @@ import ImageView from "./imageView";
 import MenuBottom from "./MenuBottom";
 import MenuCenter from "./MenuCenter";
 import MenuTop from "./MenuTop";
-import { getFeatureItems } from "@/api/minbaseApi";
+import { getFeatureItems, initContract } from "@/api/minbaseApi";
 import { LoadingItem } from "../Item";
 import FeaturedItems from "./FeaturedItem";
 import FeaturedCollection from "./FeaturedCollection";
-import { gql, useLazyQuery } from "@apollo/client";
+import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { imageUrl } from "@/utils";
+import { WalletConnect } from "@/types/types";
 
 const GET_TOKEN = gql`
   query GetTokens($contract_id: String!, $token_id: String!) {
@@ -30,23 +32,45 @@ const GET_TOKEN = gql`
   }
 `;
 
+const GET_TOKENS = gql`
+  query GetTokens($nft_contract_id: String!, $nft_token_ids: [String!]!) {
+    mb_views_nft_tokens(
+      where: {
+        nft_contract_id: { _eq: $nft_contract_id }
+        token_id: { _in: $nft_token_ids }
+        burned_timestamp: { _is_null: true }
+      }
+    ) {
+      owner
+      media
+      title
+      token_id
+    }
+  }
+`;
+
 const Marketplace = () => {
   const [featuredItems, setFeaturedItems] = useState<any>([]);
   const [featuredData, setFeaturedData] = useState<any>([]);
+  const [rentalListings, setRentalListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const contractId = process.env.NEXT_PUBLIC_STORES;
   useEffect(() => {
     const featuredItems = async () => {
       setLoading(true);
+      const walletConnect = await initContract();
+      const listings =
+        await walletConnect.contract.list_listings_by_nft_contract_id({
+          nft_contract_id: contractId,
+        });
+      console.log(`lsitings~~~~~~~~`, listings);
+      setRentalListings(listings);
       const data = await getFeatureItems();
       setFeaturedItems(data);
     };
 
     featuredItems();
   }, []);
-
-  const baseUrl =
-    "https://image-cache-service-z3w7d7dnea-ew.a.run.app/thumbnail";
 
   const description = "This NFT has no descrition.";
 
@@ -72,10 +96,9 @@ const Marketplace = () => {
   ];
 
   const [getToken, { data, error }] = useLazyQuery(GET_TOKEN);
-
+  
   useEffect(() => {
     setLoading(true);
-
     const fetchAllData = async () => {
       const results = [];
       for (const item of featuredItems) {
@@ -97,14 +120,15 @@ const Marketplace = () => {
     fetchAllData();
   }, [featuredItems, getToken]);
 
-  const imageUrl = (base_uri: string, media: string) => {
-    const url =
-      base_uri && !media.includes("https")
-        ? `${baseUrl}?url=${base_uri.replace(/\/$/, "")}/${media}`
-        : media;
-
-    return url;
-  };
+  const { error: RentalNFTError, data: RentalNFTData } = useQuery(GET_TOKENS, {
+    variables: {
+      nft_contract_id: contractId,
+      nft_token_ids: rentalListings.map((listing) => listing.nft_token_id),
+    },
+  });
+  
+  console.log(`rentalNFTData~~~~~~`, RentalNFTData);
+  
 
   if (loading) {
     return (
@@ -115,7 +139,7 @@ const Marketplace = () => {
   } else if (!featuredData.length) {
     return <div>error</div>;
   }
-  
+
   return (
     <div className="relative w-full h-full p-8 bg-[#111111] overflow-x-hidden">
       <MenuTop />
