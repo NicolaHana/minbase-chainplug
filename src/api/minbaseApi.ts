@@ -11,7 +11,6 @@ export const getFeatureItems = async () => {
   await axios
     .get(
       mintbaseApi,
-      // "https://surface-api-testnet-z3w7d7dnea-ew.a.run.app/categories/Featured/listings?limit=48&offset=0",
       {
         headers: {
           "mb-api-key": "anon",

@@ -9,7 +9,6 @@ import FeaturedItems from "./FeaturedItem";
 import FeaturedCollection from "./FeaturedCollection";
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
 import { imageUrl } from "@/utils";
-import { WalletConnect } from "@/types/types";
 
 const GET_TOKEN = gql`
   query GetTokens($contract_id: String!, $token_id: String!) {
@@ -41,8 +40,13 @@ const GET_TOKENS = gql`
         burned_timestamp: { _is_null: true }
       }
     ) {
-      owner
+      base_uri
       media
+      description
+      nft_contract_id
+      nft_contract_icon
+      nft_contract_name
+      owner
       title
       token_id
     }
@@ -55,6 +59,7 @@ const Marketplace = () => {
   const [rentalListings, setRentalListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const contractId = process.env.NEXT_PUBLIC_STORES;
+
   useEffect(() => {
     const featuredItems = async () => {
       setLoading(true);
@@ -63,7 +68,7 @@ const Marketplace = () => {
         await walletConnect.contract.list_listings_by_nft_contract_id({
           nft_contract_id: contractId,
         });
-      console.log(`lsitings~~~~~~~~`, listings);
+
       setRentalListings(listings);
       const data = await getFeatureItems();
       setFeaturedItems(data);
@@ -96,7 +101,7 @@ const Marketplace = () => {
   ];
 
   const [getToken, { data, error }] = useLazyQuery(GET_TOKEN);
-  
+
   useEffect(() => {
     setLoading(true);
     const fetchAllData = async () => {
@@ -126,9 +131,13 @@ const Marketplace = () => {
       nft_token_ids: rentalListings.map((listing) => listing.nft_token_id),
     },
   });
-  
-  console.log(`rentalNFTData~~~~~~`, RentalNFTData);
-  
+
+  useEffect(() => {
+    if (RentalNFTData?.mb_views_nft_tokens.length) {
+      console.log(`rentalNFTData~~~~~~`, RentalNFTData.mb_views_nft_tokens);
+      setFeaturedData(RentalNFTData.mb_views_nft_tokens);
+    }
+  }, [RentalNFTData]);
 
   if (loading) {
     return (
@@ -197,9 +206,9 @@ const Marketplace = () => {
             <div className="text-[44px] font-medium text-white">
               Featured Collections
             </div>
-            <div className="flex flex-grid wrap justify-between justify-items-center w-full mt-8">
+            <div className="flex flex-wrap justify-between justify-items-center w-full mt-8">
               {collectionData.map((item, index) => (
-                <div className="w-[772px]  mt-12">
+                <div className="w-[772px] mt-12" key={index}>
                   <img
                     src={item.url}
                     className="w-full h-[434px]"

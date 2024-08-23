@@ -48,7 +48,7 @@ export default function RootLayout({
   };
 
   const mintbaseClient = new ApolloClient({
-    uri: "https://interop-mainnet.hasura.app/v1/graphql",
+    uri: "https://interop-testnet.hasura.app/v1/graphql",
     cache: new InMemoryCache(),
   });
 
